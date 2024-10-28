@@ -1,38 +1,38 @@
 import React, { useEffect, useRef } from "react";
 import { Html5QrcodeScanner } from "html5-qrcode";
+import {observer} from "mobx-react-lite";
 
-const Scanner = () => {
+const QrCodeScanner = observer(({ store }) => {
     const qrCodeRef = useRef(null);
 
     useEffect(() => {
         const scanner = new Html5QrcodeScanner("qr-code-region", {
             fps: 10,
-            qrbox: 250
+            qrbox: 250,
         });
 
-        const onScanSuccess = (decodedText, decodedResult) => {
+        const handleScanSuccess = (decodedText) => {
             console.log(`Decoded Text: ${decodedText}`);
-            alert(`QR Code detected: ${decodedText}`);
+            store.setScannedData(decodedText);  // Store the scanned data in MobX store
             scanner.clear();  // Stop scanning after successful scan
         };
 
-        const onScanFailure = (error) => {
+        const handleScanFailure = (error) => {
             console.warn(`QR Code scan error: ${error}`);
         };
 
-        scanner.render(onScanSuccess, onScanFailure);
+        scanner.render(handleScanSuccess, handleScanFailure);
 
         return () => {
             scanner.clear();
         };
-    }, []);
+    }, [store]);
 
     return (
         <div>
-            <h1>QR Code Scanner</h1>
             <div id="qr-code-region" ref={qrCodeRef} style={{ width: "100%" }} />
         </div>
     );
-};
+});
 
-export default Scanner;
+export default QrCodeScanner;
